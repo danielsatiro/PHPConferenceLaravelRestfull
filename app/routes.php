@@ -18,3 +18,7 @@ Route::get('/', function()
 
 Route::resource('palestras', 'PalestrasController');
 Route::resource('palestrantes', 'PalestrantesController');
+
+Route::group(array('before' => 'auth'), function() {
+
+});

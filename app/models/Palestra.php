@@ -49,7 +49,7 @@ class Palestra extends Eloquent {
     	$response = array();
     	if ($validate->fails()) {
     		$response['messages'] = $validate->messages()->toArray();
-			$response['return_code'] = '406';
+			$response['return_code'] = 406;
 			return $response;
     	}
 
@@ -57,22 +57,44 @@ class Palestra extends Eloquent {
     	$palestra->fill($data);
 
     	if ($palestra->save()) {
-    		$response['return_code'] = '201';
+    		$response['id_palestras'] = $palestra->id_palestras;
+    		$response['return_code'] = 201;
     		return $response;
     	}
     }
 
     public static function updatePalestra($data){
+    	$validate = self::validatePalestra($data, 'U');
 
+    	$response = array();
+    	if ($validate->fails()) {
+    		$response['messages'] = $validate->messages()->toArray();
+			$response['return_code'] = 406;
+			return $response;
+    	}
+
+    	$palestra = self::find($data['id_palestras']);
+    	unset($data['id_palestras']);
+
+    	$palestra->fill($data);
+    	if ($palestra->save()) {
+    		$response['palestra'] = $palestra;
+    		$response['return_code'] = 200;
+    		return $response;
+    	}
     }
 
     public static function deletePalestra($idPalestra){
     	$palestra = self::find($idPalestra);
     	$response = array();
 
-    	if ($palestra) {
-    		$palestra->delete();
-    		$response['return_code'] = '200';
+    	if (!empty($palestra)) {
+    		$response['sucesso'] = $palestra->delete();
+    		$response['return_code'] = 200;
+    		return $response;
+    	} else {
+    		$response['messages'] = 'Palestra não encontrada';
+    		$response['return_code'] = 406;
     		return $response;
     	}
     }
@@ -80,5 +102,10 @@ class Palestra extends Eloquent {
     public static function listPalestras(){
     	$palestras = self::with('palestrante', 'macroTema')->get();
     	return $palestras;
+    }
+
+    public static function getPalestra($idPalestras){
+    	$palestra = self::with('palestrante', 'macroTema')->find($idPalestras);
+    	return $palestra;
     }
 }
